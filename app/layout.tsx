@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import { Inter } from "next/font/google";
+import { ThemeProvider } from "./components/ThemeProvider";
 import "./globals.css";
 
 const inter = Inter({
@@ -19,15 +20,10 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="en" className={inter.variable} data-theme="light" suppressHydrationWarning>
-      <head>
-        <script
-          dangerouslySetInnerHTML={{
-            __html: `(function(){var t=localStorage.getItem("ai-support-theme");if(t==="dark"||t==="light")document.documentElement.setAttribute("data-theme",t);})();`,
-          }}
-        />
-      </head>
-      <body className="antialiased font-sans">{children}</body>
+    <html lang="en" className={inter.variable} suppressHydrationWarning>
+      <body className="flex h-full min-h-0 flex-col antialiased font-sans">
+        <ThemeProvider>{children}</ThemeProvider>
+      </body>
     </html>
   );
 }
