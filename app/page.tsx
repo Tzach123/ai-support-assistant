@@ -1,42 +1,47 @@
 "use client";
 
 import { useState } from "react";
-import { InfoIcon } from "../components/icons/InfoIcon";
-import { ThemeButton } from "../components/ThemeButton";
+
+import { fetchClassification } from "@/features/support/api";
+import {
+  createAssistantErrorMessage,
+  createAssistantMessage,
+  createUserMessage,
+} from "@/features/support/utils";
 import {
   QuestionResponseList,
   SearchInput,
   WelcomeSection,
 } from "@/features/support/components";
-import type { SupportMessage } from "@/features/support/types";
+import { InfoIcon } from "@/components/icons/InfoIcon";
+import { ThemeButton } from "@/components/ThemeButton";
 
-const mockSupportResponse = async (question: string): Promise<string> => {
-  await new Promise((r) => setTimeout(r, 800));
-  return `This is a mock response for: "${question}". Replace this with a real API call.`;
-};
+import type { SupportMessage } from "@/features/support/types/support";
 
 export default function Home() {
   const [messages, setMessages] = useState<Array<SupportMessage>>([]);
+  const [isLoading, setIsLoading] = useState(false);
 
   const handleSupportSubmit = async (message: string) => {
     const trimmed = message.trim();
     if (!trimmed) return;
 
-    const id = crypto.randomUUID();
-    const newMessage: SupportMessage = {
-      id,
-      question: trimmed,
-      response: null,
-      isLoading: true,
-    };
-    setMessages((prev) => [...prev, newMessage]);
+    setMessages((prev) => [...prev, createUserMessage(trimmed)]);
+    setIsLoading(true);
 
-    const responseText = await mockSupportResponse(trimmed);
-    setMessages((prev) =>
-      prev.map((m) =>
-        m.id === id ? { ...m, response: responseText, isLoading: false } : m
-      )
-    );
+    try {
+      const { category, response: answer } = await fetchClassification(trimmed);
+      setMessages((prev) => [...prev, createAssistantMessage(category, answer)]);
+    } catch (error) {
+      const errorMessage =
+        error instanceof Error ? error.message : "Something went wrong";
+      setMessages((prev) => [
+        ...prev,
+        createAssistantErrorMessage(errorMessage),
+      ]);
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   const showWelcome = messages.length === 0;
@@ -59,10 +64,10 @@ export default function Home() {
             <WelcomeSection />
           </div>
         ) : (
-          <QuestionResponseList messages={messages} />
+          <QuestionResponseList isLoading={isLoading} messages={messages} />
         )}
         <div className="absolute bottom-8 left-1/2 w-full max-w-3xl -translate-x-1/2 px-4 sm:px-6 lg:px-8">
-          <SearchInput onSubmit={handleSupportSubmit} />
+          <SearchInput onSubmit={handleSupportSubmit} isLoading={isLoading} />
         </div>
       </main>
     </div>

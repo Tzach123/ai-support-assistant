@@ -1,11 +1,25 @@
 "use client";
 
+import { useEffect, useState } from "react";
 import { useTheme } from "next-themes";
+
 import { MoonIcon } from "./icons/MoonIcon";
 import { SunIcon } from "./icons/SunIcon";
 
 export const ThemeButton = () => {
+  const [mounted, setMounted] = useState(false);
   const { theme, setTheme } = useTheme();
+
+  useEffect(() => {
+    queueMicrotask(() => setMounted(true));
+  }, []);
+
+  if (!mounted) {
+    return (
+      <div className="h-8 w-8 rounded-md border border-border bg-bg" />
+    );
+  }
+
   const isDark = theme === "dark";
 
   const handleToggle = () => {

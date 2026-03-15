@@ -1,14 +1,17 @@
 "use client";
 
 import { useId, useState } from "react";
+
 import { SendIcon } from "@/components/icons/SendIcon";
 
+const MAX_MESSAGE_LENGTH = 500;
+
 export type SearchInputProps = {
-  /** Called with the message when the form is submitted */
   onSubmit: (message: string) => void;
+  isLoading?: boolean;
 };
 
-export const SearchInput = ({ onSubmit }: SearchInputProps) => {
+export const SearchInput = ({ onSubmit, isLoading = false }: SearchInputProps) => {
   const textareaId = useId();
   const [value, setValue] = useState("");
 
@@ -32,7 +35,7 @@ export const SearchInput = ({ onSubmit }: SearchInputProps) => {
     }
   };
 
-  const isSubmitDisabled = !value.trim();
+  const isSubmitDisabled = !value.trim() || isLoading;
 
   return (
     <form
@@ -50,8 +53,10 @@ export const SearchInput = ({ onSubmit }: SearchInputProps) => {
         onKeyDown={handleKeyDown}
         placeholder="Ask me anything..."
         rows={1}
+        maxLength={MAX_MESSAGE_LENGTH}
+        disabled={isLoading}
         aria-label="Search or message"
-        className="min-h-[44px] flex-1 resize-none bg-transparent py-2.5 text-text placeholder:text-text-muted focus:outline-none"
+        className="min-h-[44px] flex-1 resize-none bg-transparent py-2.5 text-text placeholder:text-text-muted focus:outline-none disabled:cursor-not-allowed disabled:opacity-50"
         data-testid="search-input-field"
       />
       <button

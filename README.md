@@ -1,36 +1,66 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# AI Support Assistant
+
+A chat-style support assistant that uses OpenAI to classify user inquiries into **Billing**, **Technical**, or **General** categories and returns the appropriate response.
+
+## Tech Stack
+
+- **Framework** — [Next.js 16](https://nextjs.org/) (App Router)
+- **Language** — TypeScript (strict mode)
+- **Styling** — [Tailwind CSS v4](https://tailwindcss.com/) with a custom design-system token layer
+- **AI** — [OpenAI SDK](https://github.com/openai/openai-node) (`gpt-4o-mini`)
+- **Theming** — [next-themes](https://github.com/pacocoursey/next-themes) (dark / light)
+
+## Architecture
+
+```
+app/                  → Next.js App Router pages & API routes
+  api/classify/       → POST endpoint — validates input, classifies, returns response
+components/           → Shared UI (ThemeButton, ThemeProvider, icons)
+features/support/     → Feature module (components, API client, types, utils)
+lib/                  → Server-side logic (OpenAI classify, response mapping)
+```
+
+Key decisions:
+
+- **Feature-based structure** — all support-related code lives under `features/support/` for colocation.
+- **Discriminated union types** — `SupportMessage` uses a `type` discriminator (`"user" | "assistant"`) for type-safe rendering.
+- **Design tokens via CSS custom properties** — semantic colors defined in `app/design-system.css`, consumed by Tailwind utilities. Dark theme overrides via `[data-theme="dark"]`.
+- **Server-side classification** — the OpenAI call and response mapping happen in the API route so the API key never reaches the client.
 
 ## Getting Started
 
-First, run the development server:
+### Prerequisites
+
+- Node.js 18+
+- An [OpenAI API key](https://platform.openai.com/api-keys)
+
+### Setup
 
 ```bash
+# Install dependencies
+npm install
+
+# Create environment file
+cp .env.example .env.local
+# Edit .env.local and add your OPENAI_API_KEY
+
+# Start the dev server
 npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+Open [http://localhost:3000](http://localhost:3000).
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+### Available Scripts
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+| Command | Description |
+|---|---|
+| `npm run dev` | Start development server |
+| `npm run build` | Production build |
+| `npm run start` | Serve production build |
+| `npm run lint` | Run ESLint |
 
-## Learn More
+## Environment Variables
 
-To learn more about Next.js, take a look at the following resources:
-
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
-
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
-
-## Deploy on Vercel
-
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
-
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+| Variable | Required | Description |
+|---|---|---|
+| `OPENAI_API_KEY` | Yes | OpenAI API key for classification |
